@@ -38,7 +38,7 @@ fn test() {
         [0, 1, 0, 1, 1, 1],
     ];
 
-    // Got this weights from the train function
+    // Got these weights from the train function
     let weights = [
         16.52178953510465,
         -8.064882571154394,
@@ -48,7 +48,8 @@ fn test() {
         -1.201104782213791,
     ];
 
-    let output = input
+    // Calculate the outputs for each test
+    let outputs = input
         .iter()
         .map(|&val| {
             let product = val
@@ -61,7 +62,7 @@ fn test() {
         .collect::<Vec<_>>();
 
     // prints `Results: [0.0, 1.0, 1.0, 0.0, 0.0]`
-    println!("Results: {output:?}")
+    println!("Results: {outputs:?}")
 }
 
 fn train() {
@@ -82,14 +83,18 @@ fn train() {
     let mut error = vec![0.; train_out.len()];
     let mut adjust = vec![0.; train_out.len()];
 
-    let mut weights = [0.; 6];
     let mut final_out = vec![];
+
+    let mut weights = [0.; 6];
+
+    // Generate random initial weights
     weights
         .iter_mut()
         .for_each(|val| *val = 2. * rand::random::<f64>() - 1.);
-    // println!("Weight: {weights:?}");
 
+    // Train the perceptron
     for i in 0..=1_000_000 {
+        // Calculate the output
         let output = train_input
             .iter()
             .map(|&val| {
@@ -102,23 +107,24 @@ fn train() {
             })
             .collect::<Vec<_>>();
 
+        // If it's the last run, save the output
         if i == 1_000_000 {
             final_out = output.clone();
         }
 
-        // println!("Out: {output:?}");
+        // Calculate the errors
         error
             .iter_mut()
             .enumerate()
             .for_each(|(i, val)| *val = train_out[i] as f64 - output[i]);
-        // println!("Error: {error:?}");
 
+        // Calculate the next run adjustments based from the errors
         adjust
             .iter_mut()
             .enumerate()
             .for_each(|(i, val)| *val = error[i] * variance(output[i] as f64));
-        // println!("Adjust: {adjust:?}");
 
+        // Calculate the change to weights
         let synaptic_weights = t_train_in
             .iter()
             .map(|val| {
@@ -128,13 +134,14 @@ fn train() {
                     .sum::<f64>()
             })
             .collect::<Vec<_>>();
-        // println!("SynWeight: {synaptic_weights:?}");
 
+        // Apply the change to weights
         weights.iter_mut().enumerate().for_each(|(i, val)| {
             *val += synaptic_weights[i];
         });
-        // println!("FWeight: {weights:?}");
     }
+
+    // Get the resulting weights and outputs
     println!("Weight: {weights:?}");
     println!("Out: {final_out:?}");
 }
